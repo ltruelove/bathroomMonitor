@@ -5,6 +5,10 @@
 
 const char* ssid = "...";
 const char* password = "...";
+const char* host = "ipsaveurl";
+IPAddress ip(192, 168, 201, 5);
+IPAddress gateway(192, 168, 201, 5);
+IPAddress subnet(192, 168, 201, 5);
 
 ESP8266WebServer server(80);
 
@@ -52,6 +56,7 @@ void setup(void){
   digitalWrite(led, 0);
 
   Serial.begin(115200);
+  WiFi.config(ip, gateway, subnet);
   WiFi.begin(ssid, password);
   Serial.println("");
 
@@ -64,12 +69,20 @@ void setup(void){
   Serial.print("Connected to ");
   Serial.println(ssid);
   Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  String url = String(host);
+  String ip = WiFi.localIP().toString();
+  url += ip;
+  Serial.println(ip);
 
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");
   }
     //attachInterrupt(digitalPinToInterrupt(pin), changeDoorStatus, CHANGE);
+
+  WiFiClient wClient;
+  char buf[128];
+  url.toCharArray(buf, 128);
+  wClient.connect(buf, 80);
     
   server.on("/", handleRoot);
 
